@@ -1,0 +1,27 @@
+#!/usr/bin/env node
+// Recompute hard filters, score and tier for every saved trace in data/matches from the stored
+// evaluation. No API calls: edit match/score.mjs, run this, then rebuild the report.
+import fs from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+import { hardFilters, score, tier } from "./score.mjs";
+
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+const MATCH_DIR = path.join(ROOT, "data", "matches");
+const profile = JSON.parse(fs.readFileSync(path.join(ROOT, "data", "profile.json"), "utf8"));
+
+const before = {}, after = {}; let changed = 0;
+for (const f of fs.readdirSync(MATCH_DIR).filter((f) => f.endsWith(".json"))) {
+  const p = path.join(MATCH_DIR, f);
+  const m = JSON.parse(fs.readFileSync(p, "utf8"));
+  if (m.status !== "ok") continue;
+  before[m.tier] = (before[m.tier] || 0) + 1;
+  const filters = hardFilters(m.evaluation, profile);
+  const s = score(m.evaluation, profile);
+  const t = tier(s.total, filters);
+  if (t !== m.tier || s.total !== m.score.total || filters.join("|") !== m.filters.join("|")) changed++;
+  m.filters = filters; m.score = s; m.tier = t; m.rescored_at = new Date().toISOString();
+  after[t] = (after[t] || 0) + 1;
+  fs.writeFileSync(p, JSON.stringify(m, null, 2));
+}
+console.log(`rescored ${changed} changed. before ${JSON.stringify(before)} after ${JSON.stringify(after)}`);

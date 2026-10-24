@@ -1,0 +1,9 @@
+.env
+node_modules/
+report/out/
+
+# Personal data and scraped postings stay local (public repo holds code only).
+data/profile.json
+data/raw/
+data/jobs/
+data/matches/

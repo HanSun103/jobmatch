@@ -1,0 +1,24 @@
+{
+  "_doc": "Saved LinkedIn job searches derived from profile.json target.titles_ranked. Each search becomes one LinkedIn URL. f_TPR=r604800 means posted in last 7 days. f_WT: 2=remote, 3=hybrid, 1=onsite. geoId 101174742 = Canada.",
+  "defaults": {
+    "posted_within_seconds": 604800,
+    "max_cards_per_search": 25,
+    "pace_seconds_between_cards": [2, 5]
+  },
+  "locations": [
+    {"name": "Toronto, Ontario, Canada", "geoId": "100025096"},
+    {"name": "Ottawa, Ontario, Canada", "geoId": "104061000"},
+    {"name": "Canada (remote)", "geoId": "101174742", "work_type": "2"}
+  ],
+  "searches": [
+    {"id": "ds",   "rank": 1, "keywords": "Data Scientist"},
+    {"id": "ads",  "rank": 1, "keywords": "Applied Scientist"},
+    {"id": "mls",  "rank": 2, "keywords": "Machine Learning Scientist"},
+    {"id": "ai",   "rank": 2, "keywords": "AI Scientist OR \"Applied AI\" OR \"LLM Evaluation\""},
+    {"id": "mle",  "rank": 3, "keywords": "Machine Learning Engineer", "seniority_filter": "junior_or_intermediate_only"},
+    {"id": "de",   "rank": 3, "keywords": "Data Engineer", "seniority_filter": "junior_or_intermediate_only"},
+    {"id": "econ", "rank": 4, "keywords": "Economist"},
+    {"id": "mv",   "rank": 5, "keywords": "Model Validation OR \"Model Risk\""}
+  ],
+  "url_template": "https://www.linkedin.com/jobs/search/?keywords={keywords}&geoId={geoId}&f_TPR=r{posted_within_seconds}{work_type_param}&sortBy=DD"
+}
