@@ -7,6 +7,7 @@
 
 import fs from "node:fs";
 import path from "node:path";
+import { writeSkipStubs } from "./quality.mjs";
 
 const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, "$1")), "..");
 const JOBS_DIR = path.join(ROOT, "data", "jobs");
@@ -65,21 +66,11 @@ async function fetchJob(id) {
   throw new Error(`gave up on ${id}`);
 }
 
-// Titles clearly outside the target band (profile: mid-level; engineering only junior/intermediate) or not analytics roles.
-const SKIP_TITLE = /\b(intern|co-?op|stage|stagiaire|director|principal|staff|head of|vp|vice president|manager|chief|architect)\b|people scientist|ecologist|annotation|labell?ing|subject matter expert|product manager|account executive|programme de stages|intern program/i;
-
 async function main() {
   const cards = JSON.parse(fs.readFileSync(CARDS, "utf8")).cards;
-  let skipped = 0;
-  for (const c of cards) {
-    const f = path.join(JOBS_DIR, `${c.id}.json`);
-    if (!fs.existsSync(f) && SKIP_TITLE.test(c.title)) {
-      fs.writeFileSync(f, JSON.stringify({ ...c, status: "skipped_title", skip_reason: c.title.match(SKIP_TITLE)[0], fetched_at: null }, null, 2));
-      skipped++;
-    }
-  }
+  const { skipped, skipped_by } = writeSkipStubs(cards, JOBS_DIR);
   const todo = cards.filter((c) => (!ONLY || ONLY.includes(c.id)) && !fs.existsSync(path.join(JOBS_DIR, `${c.id}.json`))).slice(0, LIMIT);
-  console.log(`${cards.length} cards, ${skipped} newly skipped by title, ${todo.length} to fetch, delay ${DELAY}ms`);
+  console.log(`${cards.length} cards, ${skipped} newly skipped (${JSON.stringify(skipped_by)}), ${todo.length} to fetch, delay ${DELAY}ms`);
   let ok = 0, fail = 0;
   for (const [i, c] of todo.entries()) {
     try {

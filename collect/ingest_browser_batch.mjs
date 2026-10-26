@@ -7,22 +7,19 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { writeSkipStubs } from "./quality.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const JOBS_DIR = path.join(ROOT, "data", "jobs");
 const cards = new Map(JSON.parse(fs.readFileSync(path.join(JOBS_DIR, "cards.json"), "utf8")).cards.map((c) => [c.id, c]));
-const SKIP_TITLE = /\b(intern|co-?op|stage|stagiaire|director|principal|staff|head of|vp|vice president|manager|chief|architect)\b|people scientist|ecologist|annotation|labell?ing|subject matter expert|product manager|account executive|programme de stages|intern program/i;
 const exists = (id) => fs.existsSync(path.join(JOBS_DIR, `${id}.json`));
 
 const args = process.argv.slice(2);
 if (args.includes("--todo")) {
   const n = Number(args[args.indexOf("--n") + 1] || 12);
-  let skipped = 0;
-  for (const c of cards.values()) if (!exists(c.id) && SKIP_TITLE.test(c.title)) {
-    fs.writeFileSync(path.join(JOBS_DIR, `${c.id}.json`), JSON.stringify({ ...c, status: "skipped_title", skip_reason: c.title.match(SKIP_TITLE)[0], fetched_at: null }, null, 2)); skipped++;
-  }
+  const { skipped, skipped_by } = writeSkipStubs([...cards.values()], JOBS_DIR);
   const todo = [...cards.values()].filter((c) => !exists(c.id)).map((c) => c.id);
-  console.log(JSON.stringify({ skipped_now: skipped, remaining: todo.length, next: todo.slice(0, n) }));
+  console.log(JSON.stringify({ skipped_now: skipped, skipped_by, remaining: todo.length, next: todo.slice(0, n) }));
   process.exit(0);
 }
 

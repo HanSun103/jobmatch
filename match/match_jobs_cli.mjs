@@ -13,6 +13,7 @@ import { fileURLToPath } from "node:url";
 import { z } from "zod";
 import { JobEvaluation } from "./schema.mjs";
 import { hardFilters, score, tier } from "./score.mjs";
+import { qualityFilters } from "../collect/quality.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const JOBS_DIR = path.join(ROOT, "data", "jobs");
@@ -105,24 +106,32 @@ function validateEvidence(ev, pointerSet) {
 async function main() {
   fs.mkdirSync(OUT_DIR, { recursive: true });
   const pointerSet = collectPointers(profile);
-  const jobs = fs.readdirSync(JOBS_DIR).filter((f) => /^\d+\.json$/.test(f))
+  let prefiltered = 0;
+  const jobs = fs.readdirSync(JOBS_DIR).filter((f) => f.endsWith(".json") && f !== "cards.json")
     .map((f) => JSON.parse(fs.readFileSync(path.join(JOBS_DIR, f), "utf8")))
     .filter((j) => j.status === "ok" && j.description && (!ONLY || ONLY.includes(j.id)))
     .filter((j) => FORCE || !fs.existsSync(path.join(OUT_DIR, `${j.id}.json`)))
+    .filter((j) => {
+      // Quality alone (excluded company, stale original date) decides without spending an evaluation.
+      const qf = qualityFilters(j.quality);
+      if (!qf.length) return true;
+      fs.writeFileSync(path.join(OUT_DIR, `${j.id}.json`), JSON.stringify({ id: j.id, title: j.title, company: j.company, location: j.location, url: j.url, posted_date: j.posted_date || null, source: j.source || "linkedin", hits: j.hits, evaluated_at: new Date().toISOString(), status: "prefiltered", quality: j.quality, filters: qf, tier: "filtered_out" }, null, 2));
+      prefiltered++; return false;
+    })
     .slice(0, LIMIT);
-  console.log(`${jobs.length} jobs to evaluate via claude -p (model ${MODEL}, effort ${EFFORT}), concurrency ${CONC}, ${pointerSet.size} known evidence pointers`);
+  console.log(`${jobs.length} jobs to evaluate via claude -p (model ${MODEL}, effort ${EFFORT}), concurrency ${CONC}, ${pointerSet.size} known evidence pointers; ${prefiltered} prefiltered by quality`);
   let done = 0, errors = 0; const usage = { input: 0, cached: 0, output: 0, cost_estimate_usd: 0 };
   const queue = [...jobs];
   async function worker() {
     while (queue.length) {
       const job = queue.shift(); const t0 = Date.now();
       const r = await evaluate(job);
-      const out = { id: job.id, title: job.title, company: job.company, location: job.location, url: job.url, posted_date: job.posted_date || null, hits: job.hits, evaluated_at: new Date().toISOString(), model: r.model || MODEL, via: "claude-cli" };
+      const out = { id: job.id, title: job.title, company: job.company, location: job.location, url: job.url, posted_date: job.posted_date || null, source: job.source || "linkedin", hits: job.hits, evaluated_at: new Date().toISOString(), model: r.model || MODEL, via: "claude-cli", quality: job.quality || null };
       if (r.error) { out.status = "error"; out.error = r.error; out.detail = r.detail; errors++; }
       else {
         const ev = r.evaluation;
         out.invented_pointers_dropped = validateEvidence(ev, pointerSet);
-        out.evaluation = ev; out.filters = hardFilters(ev, profile); out.score = score(ev, profile); out.tier = tier(out.score.total, out.filters); out.status = "ok"; out.usage = r.usage;
+        out.evaluation = ev; out.filters = hardFilters(ev, profile, { quality: job.quality }); out.score = score(ev, profile); out.tier = tier(out.score.total, out.filters); out.status = "ok"; out.usage = r.usage;
         for (const k of Object.keys(usage)) usage[k] += r.usage[k] || 0;
       }
       fs.writeFileSync(path.join(OUT_DIR, `${job.id}.json`), JSON.stringify(out, null, 2));

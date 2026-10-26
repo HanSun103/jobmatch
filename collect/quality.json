@@ -1,0 +1,13 @@
+{
+  "_doc": "Posting-quality rules. max_age_days: filter out postings whose ORIGINAL date (earliest of LinkedIn date, LinkedIn-id estimate, ATS first_published) is older than this. repost_days: flag a posting as a repost when LinkedIn's date is this many days after the original. exclude_companies: case-insensitive substrings of company names never worth applying to (gig / AI-training / freelance marketplaces). skip_title_pattern: titles never fetched or evaluated. board_*: which board postings become candidates.",
+  "max_age_days": 30,
+  "repost_days": 14,
+  "exclude_companies": [
+    "Alignerr", "Outlier", "DataAnnotation", "Data Annotation", "Mercor", "Micro1", "Toptal", "Turing", "Braintrust",
+    "Toloka", "Appen", "Prolific", "Crossover", "Remotasks", "Scale AI", "Pareto", "Invisible Technologies", "Surge AI",
+    "TELUS Digital", "TELUS International", "Lionbridge", "Upwork", "Handshake AI", "Sama", "Snorkel", "Labelbox"
+  ],
+  "skip_title_pattern": "\\b(intern|co-?op|stage|stagiaire|director|principal|staff|head of|vp|vice president|manager|chief|architect)\\b|people scientist|ecologist|annotation|annotator|labell?ing|labeler|subject matter expert|product manager|account executive|programme de stages|intern program|ai training|ai trainer|ai tutor|expert contributor|\\brater\\b",
+  "board_title_pattern": "data scien|applied scien|machine learning|\\bml\\b|\\bai\\b|artificial intelligence|economist|model (validation|risk|governance)|data engineer|analytics|quantitative|research scientist|decision scien",
+  "board_location_pattern": "canada|canadian|toronto|ottawa|ontario|\\bon\\b|kitchener|waterloo|montr[eé]al|qu[eé]bec|vancouver|calgary|edmonton|winnipeg|halifax|americas|north america|^remote$|^$"
+}

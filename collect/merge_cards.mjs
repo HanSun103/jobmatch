@@ -19,8 +19,15 @@ for (const file of process.argv.slice(2)) {
       const [id, title, company, location, posted] = line.split("|");
       const hit = { search, loc, rank: rank + 1 };
       const prev = byId.get(id);
-      if (prev) { if (!prev.hits.some((h) => h.search === search && h.loc === loc)) prev.hits.push(hit); continue; }
-      byId.set(id, { id, title, company, card_location: location, posted_date: posted || null, hits: [hit] });
+      const today = new Date().toISOString().slice(0, 10);
+      if (prev) {
+        if (!prev.hits.some((h) => h.search === search && h.loc === loc)) prev.hits.push(hit);
+        // Seen again in a later crawl: keep the first date LinkedIn showed, record the refresh.
+        prev.last_seen = today;
+        if (posted && prev.posted_date && posted !== prev.posted_date) (prev.posted_dates_seen ||= [prev.posted_date]).push(posted);
+        continue;
+      }
+      byId.set(id, { id, title, company, card_location: location, posted_date: posted || null, first_seen: today, last_seen: today, hits: [hit] });
     }
   }
 }

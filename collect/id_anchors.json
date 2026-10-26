@@ -1,0 +1,10 @@
+{
+  "_doc": "LinkedIn job ids are sequential, so an id maps to the date the posting was created even when the company later refreshes the visible posted date. Anchors pair an id with a known creation date (from an ATS first_published that matches the same posting). estimateCreatedDate() interpolates between anchors; collect/assess_quality.mjs adds the current frontier (highest id seen, with its posted date) at run time. Add anchors whenever a LinkedIn posting is linked to a board posting with a trustworthy date.",
+  "anchors": [
+    { "id": 4317722029, "date": "2025-10-22", "source": "ashby cohere publishedAt: Senior Research Scientist, Model Evaluation" },
+    { "id": 4435262687, "date": "2026-07-02", "source": "greenhouse faire first_published: Senior Applied ML/AI Scientist - Search" },
+    { "id": 4473569226, "date": "2026-09-29", "source": "greenhouse lyft first_published: Data Scientist, Decisions - Mapping" },
+    { "id": 4481643929, "date": "2026-10-22", "source": "greenhouse affirm first_published: Senior Analyst (Remote Canada)" },
+    { "id": 4483107261, "date": "2026-10-23", "source": "frontier: highest id in cards.json on 2026-10-23" }
+  ]
+}

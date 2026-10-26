@@ -1,0 +1,25 @@
+{
+  "_doc": "Employer career boards with a public JSON API. `match` is a regex tested against the LinkedIn company name so LinkedIn postings can be linked to their board posting (true first-published date). Discovered 2026-10-26 by probing slugs for companies in the strong/good tiers; add more as they show up. Providers: greenhouse (slug), ashby (slug), lever (slug), workday (tenant, site, wd).",
+  "search_terms": ["data scientist", "applied scientist", "machine learning", "economist", "model validation", "data engineer", "analytics"],
+  "boards": [
+    { "name": "Stripe", "match": "^stripe$", "provider": "greenhouse", "slug": "stripe" },
+    { "name": "Lyft", "match": "^lyft$", "provider": "greenhouse", "slug": "lyft" },
+    { "name": "Faire", "match": "^faire$", "provider": "greenhouse", "slug": "faire" },
+    { "name": "Affirm", "match": "^affirm$", "provider": "greenhouse", "slug": "affirm" },
+    { "name": "Pinterest", "match": "^pinterest$", "provider": "greenhouse", "slug": "pinterest" },
+    { "name": "OpenTable", "match": "^opentable$", "provider": "greenhouse", "slug": "opentable" },
+    { "name": "Clutch", "match": "^clutch$", "provider": "greenhouse", "slug": "clutch" },
+    { "name": "Knak", "match": "^knak$", "provider": "greenhouse", "slug": "knak" },
+    { "name": "Tata Consultancy Services", "match": "tata consultancy|^tcs$", "provider": "greenhouse", "slug": "tcs" },
+    { "name": "Cohere", "match": "^cohere$", "provider": "ashby", "slug": "cohere" },
+    { "name": "SandboxAQ", "match": "^sandboxaq$", "provider": "ashby", "slug": "sandboxaq" },
+    { "name": "KPMG Canada", "match": "^kpmg", "provider": "lever", "slug": "kpmg" },
+    { "name": "TD", "match": "^td\\b|^td bank|^td securities|^td insurance", "provider": "workday", "tenant": "td", "site": "TD_Bank_Careers", "wd": "wd3" },
+    { "name": "BMO", "match": "^bmo\\b|bank of montreal", "provider": "workday", "tenant": "bmo", "site": "External", "wd": "wd3" },
+    { "name": "Sun Life", "match": "^sun ?life", "provider": "workday", "tenant": "sunlife", "site": "Experienced-Jobs", "wd": "wd3" },
+    { "name": "CIBC", "match": "^cibc\\b", "provider": "workday", "tenant": "cibc", "site": "search", "wd": "wd3" },
+    { "name": "Mastercard", "match": "^mastercard$", "provider": "workday", "tenant": "mastercard", "site": "CorporateCareers", "wd": "wd1" },
+    { "name": "Autodesk", "match": "^autodesk$", "provider": "workday", "tenant": "autodesk", "site": "Ext", "wd": "wd1" },
+    { "name": "Manulife", "match": "^manulife|john hancock", "provider": "workday", "tenant": "manulife", "site": "MFCJH_Jobs", "wd": "wd3" }
+  ]
+}

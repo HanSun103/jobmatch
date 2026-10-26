@@ -1,5 +1,6 @@
 // Deterministic scoring and hard filters over a JobEvaluation + profile targets.
 // Everything here is replayable from the trace: change weights, re-run, no API calls.
+import { qualityFilters } from "../collect/quality.mjs";
 
 const FAMILY_RANK = {
   data_scientist: 1, analytics: 1,
@@ -10,8 +11,10 @@ const FAMILY_RANK = {
 };
 const VERDICT_POINTS = { met: 1, partial: 0.5, gap: 0, unknown: 0.25 };
 
-export function hardFilters(ev, profile) {
-  const out = [];
+// `meta` carries posting-level facts the evaluation does not know: meta.quality is the block written by
+// collect/assess_quality.mjs (original date, age, repost, excluded company, applicants).
+export function hardFilters(ev, profile, meta = {}) {
+  const out = qualityFilters(meta.quality);
   // Seniority band: mid-level target; engineering only junior/intermediate.
   const eng = ["ml_engineer", "data_engineer", "ai_engineer"].includes(ev.title_family);
   if (["staff_principal", "manager"].includes(ev.seniority)) out.push(`seniority ${ev.seniority} is above target band`);
